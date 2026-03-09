@@ -3,7 +3,6 @@
 #include "esphome/core/component.h"
 #include "esphome/components/sensor/sensor.h"
 #include "esphome/components/text_sensor/text_sensor.h"
-#include "esphome/components/binary_sensor/binary_sensor.h"
 #include "sdmmc_cmd.h"
 
 namespace esphome {
@@ -21,7 +20,6 @@ class WaveshareSDMMC : public Component {
   // Sensores
   void set_total_space_sensor(sensor::Sensor *s) { this->total_space_sensor_ = s; }
   void set_free_space_sensor(sensor::Sensor *s) { this->free_space_sensor_ = s; }
-  void set_mounted_sensor(binary_sensor::BinarySensor *s) { this->mounted_sensor_ = s; }
   void set_last_error_sensor(text_sensor::TextSensor *s) { this->last_error_sensor_ = s; }
   void set_last_read_sensor(text_sensor::TextSensor *s) { this->last_read_sensor_ = s; }
 
