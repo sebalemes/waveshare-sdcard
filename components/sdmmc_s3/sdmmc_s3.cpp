@@ -1,4 +1,4 @@
-#include "sdmmc_s3.h"
+#include "sdmmc.h"
 #include "esphome/core/log.h"
 
 #include "driver/sdmmc_host.h"
@@ -6,11 +6,11 @@
 #include "esp_vfs_fat.h"
 
 namespace esphome {
-namespace sdmmc_s3 {
+namespace sdmmc {
 
-static const char *TAG = "sdmmc_s3";
+static const char *TAG = "sdmmc";
 
-void SDMMCS3::setup() {
+void SDMMC::setup() {
   ESP_LOGI(TAG, "Inicializando SDMMC...");
 
   sdmmc_host_t host = SDMMC_HOST_DEFAULT();
@@ -55,8 +55,8 @@ void SDMMCS3::setup() {
   ESP_LOGI(TAG, "SDMMC montado com sucesso");
 }
 
-void SDMMCS3::dump_config() {
-  ESP_LOGCONFIG(TAG, "SDMMC S3:");
+void SDMMC::dump_config() {
+  ESP_LOGCONFIG(TAG, "SDMMC:");
   ESP_LOGCONFIG(TAG, "  Montado: %s", mounted_ ? "Sim" : "Não");
   if (mounted_) {
     ESP_LOGCONFIG(TAG, "  Total: %u bytes", (unsigned) total_bytes_);
@@ -64,5 +64,5 @@ void SDMMCS3::dump_config() {
   }
 }
 
-}  // namespace sdmmc_s3
+}  // namespace sdmmc
 }  // namespace esphome
