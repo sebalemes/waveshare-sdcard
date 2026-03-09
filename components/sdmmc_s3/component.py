@@ -1,11 +1,11 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
 
-sdmmc_s3_ns = cg.esphome_ns.namespace("sdmmc_s3")
-SDMMCS3 = sdmmc_s3_ns.class_("SDMMCS3", cg.Component)
+sdmmc_ns = cg.esphome_ns.namespace("sdmmc")
+SDMMC = sdmmc_ns.class_("SDMMC", cg.Component)
 
 CONFIG_SCHEMA = cv.Schema({
-    cv.GenerateID(): cv.declare_id(SDMMCS3),
+    cv.GenerateID(): cv.declare_id(SDMMC),
 })
 
 async def to_code(config):
