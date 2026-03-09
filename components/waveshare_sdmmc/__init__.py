@@ -2,7 +2,7 @@ import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome import automation
 from esphome.automation import maybe_simple_id
-from esphome.components import sensor, text_sensor
+from esphome.components import sensor, text_sensor, esp32
 from esphome.const import CONF_ID
 
 AUTO_LOAD = ["sensor", "text_sensor"]
@@ -31,6 +31,10 @@ async def update_sensors_action(config, action_id, template_arg, args):
     return cg.new_Pvariable(action_id, template_arg, parent)
 
 async def to_code(config):
+    # Dependências do ESP-IDF
+    esp32.add_idf_component(name="fatfs")
+    esp32.add_idf_component(name="driver")
+
     var = cg.new_Pvariable(config[CONF_ID])
     await cg.register_component(var, config)
 
