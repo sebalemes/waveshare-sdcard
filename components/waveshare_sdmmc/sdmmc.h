@@ -51,6 +51,15 @@ class WaveshareSDMMC : public Component {
   std::string last_error_;
   std::string last_read_;
 };
+class UpdateSensorsAction : public Action<> {
+ public:
+  UpdateSensorsAction(WaveshareSDMMC *parent) : parent_(parent) {}
+  void play() override {
+    this->parent_->update_sensors();
+  }
+ protected:
+  WaveshareSDMMC *parent_;
+};
 
 }  // namespace waveshare_sdmmc
 }  // namespace esphome
