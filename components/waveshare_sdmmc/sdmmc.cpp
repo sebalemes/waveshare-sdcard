@@ -12,9 +12,14 @@ namespace waveshare_sdmmc {
 static const char *TAG = "waveshare_sdmmc";
 
 // Pinos do TF Card na Waveshare ESP32-S3-ETH-8DI-8RO
-static constexpr gpio_num_t PIN_NUM_MISO = GPIO_NUM_45;
-static constexpr gpio_num_t PIN_NUM_MOSI = GPIO_NUM_47;
-static constexpr gpio_num_t PIN_NUM_CLK  = GPIO_NUM_48;
+sdspi_device_config_t slot_config = SDSPI_DEVICE_CONFIG_DEFAULT();
+
+slot_config.gpio_cs = -1;   // CS controlado pela placa
+slot_config.host_id = host.slot;
+
+slot_config.gpio_miso = GPIO_NUM_45;
+slot_config.gpio_mosi = GPIO_NUM_47;
+slot_config.gpio_sck  = GPIO_NUM_48;
 
 // ATENÇÃO:
 // A tabela da placa mostra CS = NC.
