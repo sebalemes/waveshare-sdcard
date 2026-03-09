@@ -1,11 +1,11 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
 
-sdmmc_ns = cg.esphome_ns.namespace("sdmmc")
-SDMMC = sdmmc_ns.class_("SDMMC", cg.Component)
+waveshare_sdmmc_ns = cg.esphome_ns.namespace("waveshare_sdmmc")
+Waveshare_SDMMC = waveshare_sdmmc_ns.class_("WaveshareSDMMC", cg.Component)
 
 CONFIG_SCHEMA = cv.Schema({
-    cv.GenerateID(): cv.declare_id(SDMMC),
+    cv.GenerateID(): cv.declare_id(Waveshare_SDMMC),
 })
 
 async def to_code(config):
