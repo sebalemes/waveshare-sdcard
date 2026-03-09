@@ -5,7 +5,7 @@ from esphome.automation import maybe_simple_id
 from esphome.components import sensor, text_sensor
 from esphome.const import CONF_ID
 
-AUTO_LOAD = ["sensor", "text_sensor", "binary_sensor"]
+AUTO_LOAD = ["sensor", "text_sensor"]
 
 waveshare_sdmmc_ns = cg.esphome_ns.namespace("waveshare_sdmmc")
 WaveshareSDMMC = waveshare_sdmmc_ns.class_("WaveshareSDMMC", cg.Component)
