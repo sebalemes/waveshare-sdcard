@@ -5,8 +5,8 @@
     "cmake": true
   },
   "files": [
-    "sdmmc_s3.h",
-    "sdmmc_s3.cpp",
+    "sdmmc.h",
+    "sdmmc.cpp",
     "component.py",
     "CMakeLists.txt"
   ]
