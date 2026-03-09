@@ -18,20 +18,16 @@ class WaveshareSDMMC : public Component {
   void setup() override;
   void loop() override;
 
-  // Funções principais
   bool write_file(const char *path, const char *data);
   std::string read_file(const char *path);
 
-  // Sensores
   void set_total_space_sensor(sensor::Sensor *s) { this->total_space_sensor_ = s; }
   void set_free_space_sensor(sensor::Sensor *s) { this->free_space_sensor_ = s; }
   void set_last_error_sensor(text_sensor::TextSensor *s) { this->last_error_sensor_ = s; }
   void set_last_read_sensor(text_sensor::TextSensor *s) { this->last_read_sensor_ = s; }
 
-  // Atualização manual
   void update_sensors();
 
-  // Espaço do cartão
   size_t get_total_space();
   size_t get_free_space();
 
@@ -54,12 +50,11 @@ class WaveshareSDMMC : public Component {
   std::string last_read_;
 };
 
-
-class UpdateSensorsAction : public Action<> {
+template<typename... Ts> class UpdateSensorsAction : public Action<Ts...> {
  public:
   explicit UpdateSensorsAction(WaveshareSDMMC *parent) : parent_(parent) {}
 
-  void play() override {
+  void play(Ts... x) override {
     if (this->parent_ != nullptr) {
       this->parent_->update_sensors();
     }
