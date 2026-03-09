@@ -148,10 +148,6 @@ size_t WaveshareSDMMC::get_free_space() {
 }
 
 void WaveshareSDMMC::update_sensors() {
-  if (this->mounted_sensor_ != nullptr) {
-    this->mounted_sensor_->publish_state(this->initialized_);
-  }
-
   if (!this->initialized_) {
     if (this->last_error_sensor_ != nullptr) {
       this->last_error_sensor_->publish_state("SD não montado");
