@@ -1,5 +1,5 @@
 {
-  "name": "sdmmc_s3",
+  "name": "sdmmc",
   "version": "0.3.0",
   "build": {
     "cmake": true
