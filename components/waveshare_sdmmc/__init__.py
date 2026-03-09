@@ -5,6 +5,7 @@ from esphome.components import sensor, text_sensor, binary_sensor
 
 waveshare_sdmmc_ns = cg.esphome_ns.namespace("waveshare_sdmmc")
 WaveshareSDMMC = waveshare_sdmmc_ns.class_("WaveshareSDMMC", cg.Component)
+UpdateSensorsAction = waveshare_sdmmc_ns.class_("UpdateSensorsAction", automation.Action)
 
 CONFIG_SCHEMA = cv.Schema({
     cv.GenerateID(): cv.declare_id(WaveshareSDMMC),
@@ -20,10 +21,13 @@ CONFIG_SCHEMA = cv.Schema({
 # Ação para atualizar sensores manualmente
 UPDATE_ACTION_SCHEMA = cv.Schema({})
 
-@automation.register_action("waveshare_sdmmc.update_sensors", UPDATE_ACTION_SCHEMA)
+@automation.register_action(
+    "waveshare_sdmmc.update_sensors",
+    UPDATE_ACTION_SCHEMA
+)
 async def update_sensors_action(config, action_id, template_arg):
-    var = cg.new_Pvariable(action_id, template_arg)
-    return var
+    parent = await cg.get_variable(config[cv.GenerateID()])
+    return cg.new_Pvariable(action_id, parent)
 
 async def to_code(config):
     var = cg.new_Pvariable(config[cv.GenerateID()])
