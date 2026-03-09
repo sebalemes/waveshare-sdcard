@@ -1,50 +1,77 @@
 #include "sdmmc.h"
 #include "esphome/core/log.h"
 
-#include "driver/sdmmc_host.h"
-#include "driver/sdmmc_defs.h"
+#include "driver/spi_common.h"
+#include "driver/sdspi_host.h"
 #include "fatfs/vfs/esp_vfs_fat.h"
 #include "ff.h"
-#include "driver/sdspi_host.h"
-#include "driver/spi_common.h"
 
 namespace esphome {
 namespace waveshare_sdmmc {
 
 static const char *TAG = "waveshare_sdmmc";
 
+// Pinos do TF Card na Waveshare ESP32-S3-ETH-8DI-8RO
+static constexpr gpio_num_t PIN_NUM_MISO = GPIO_NUM_45;
+static constexpr gpio_num_t PIN_NUM_MOSI = GPIO_NUM_47;
+static constexpr gpio_num_t PIN_NUM_CLK  = GPIO_NUM_48;
+
+// ATENÇÃO:
+// A tabela da placa mostra CS = NC.
+// Se o hardware realmente não expõe CS ao usuário, este ponto pode exigir
+// ajuste conforme o esquemático real da placa ou implementação do fabricante.
+// Aqui deixamos um placeholder para teste.
+static constexpr gpio_num_t PIN_NUM_CS   = GPIO_NUM_NC;
+
 void WaveshareSDMMC::setup() {
-  ESP_LOGI(TAG, "Inicializando SDMMC...");
+  ESP_LOGI(TAG, "Inicializando TF Card via SDSPI...");
 
-  sdmmc_host_t host = SDMMC_HOST_DEFAULT();
-  sdmmc_slot_config_t slot_config = SDMMC_SLOT_CONFIG_DEFAULT();
+  spi_bus_config_t bus_cfg = {};
+  bus_cfg.mosi_io_num = PIN_NUM_MOSI;
+  bus_cfg.miso_io_num = PIN_NUM_MISO;
+  bus_cfg.sclk_io_num = PIN_NUM_CLK;
+  bus_cfg.quadwp_io_num = GPIO_NUM_NC;
+  bus_cfg.quadhd_io_num = GPIO_NUM_NC;
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
+  bus_cfg.data4_io_num = GPIO_NUM_NC;
+  bus_cfg.data5_io_num = GPIO_NUM_NC;
+  bus_cfg.data6_io_num = GPIO_NUM_NC;
+  bus_cfg.data7_io_num = GPIO_NUM_NC;
+#endif
+  bus_cfg.max_transfer_sz = 4000;
 
-  // Ajuste aqui se a placa exigir pinos específicos
-  // Exemplo:
-  // slot_config.width = 4;
-  // slot_config.clk = GPIO_NUM_xx;
-  // slot_config.cmd = GPIO_NUM_xx;
-  // slot_config.d0  = GPIO_NUM_xx;
-  // slot_config.d1  = GPIO_NUM_xx;
-  // slot_config.d2  = GPIO_NUM_xx;
-  // slot_config.d3  = GPIO_NUM_xx;
-
-  esp_vfs_fat_sdmmc_mount_config_t mount_config = {
-      .format_if_mount_failed = false,
-      .max_files = 5,
-      .allocation_unit_size = 16 * 1024
-  };
-
-  esp_err_t ret = esp_vfs_fat_sdmmc_mount("/sdcard", &host, &slot_config, &mount_config, &this->card_);
-
+  esp_err_t ret = spi_bus_initialize(SPI2_HOST, &bus_cfg, SPI_DMA_CH_AUTO);
   if (ret != ESP_OK) {
-    ESP_LOGE(TAG, "Falha ao montar SDMMC: %s", esp_err_to_name(ret));
+    ESP_LOGE(TAG, "Falha ao inicializar SPI bus: %s", esp_err_to_name(ret));
     this->initialized_ = false;
     this->last_error_ = esp_err_to_name(ret);
     return;
   }
 
-  ESP_LOGI(TAG, "SDMMC montado com sucesso!");
+  sdmmc_host_t host = SDSPI_HOST_DEFAULT();
+  host.slot = SPI2_HOST;
+
+  sdspi_device_config_t slot_config = SDSPI_DEVICE_CONFIG_DEFAULT();
+  slot_config.host_id = SPI2_HOST;
+  slot_config.gpio_cs = PIN_NUM_CS;
+
+  esp_vfs_fat_mount_config_t mount_config = {
+      .format_if_mount_failed = false,
+      .max_files = 5,
+      .allocation_unit_size = 16 * 1024
+  };
+
+  ret = esp_vfs_fat_sdspi_mount("/sdcard", &host, &slot_config, &mount_config, &this->card_);
+
+  if (ret != ESP_OK) {
+    ESP_LOGE(TAG, "Falha ao montar SDSPI: %s", esp_err_to_name(ret));
+    this->initialized_ = false;
+    this->last_error_ = esp_err_to_name(ret);
+    spi_bus_free(SPI2_HOST);
+    return;
+  }
+
+  ESP_LOGI(TAG, "TF Card montado com sucesso em /sdcard");
   this->initialized_ = true;
   this->last_error_.clear();
 }
