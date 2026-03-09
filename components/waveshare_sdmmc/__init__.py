@@ -1,13 +1,23 @@
-import esphome.codegen as cg
-import esphome.config_validation as cv
+from esphome import automation
 
-waveshare_sdmmc_ns = cg.esphome_ns.namespace("waveshare_sdmmc")
-WaveshareSDMMC = waveshare_sdmmc_ns.class_("WaveshareSDMMC", cg.Component)
+WRITE_ACTION_SCHEMA = cv.Schema({
+    cv.Required("path"): cv.string,
+    cv.Required("data"): cv.string,
+})
 
-CONFIG_SCHEMA = cv.Schema({
-    cv.GenerateID(): cv.declare_id(WaveshareSDMMC),
-}).extend(cv.COMPONENT_SCHEMA)
+READ_ACTION_SCHEMA = cv.Schema({
+    cv.Required("path"): cv.string,
+})
 
-async def to_code(config):
-    var = cg.new_Pvariable(config[cv.GenerateID()])
-    await cg.register_component(var, config)
+@automation.register_action("waveshare_sdmmc.write_file", WRITE_ACTION_SCHEMA)
+async def write_file_action(config, action_id, template_arg):
+    var = cg.new_Pvariable(action_id, template_arg)
+    cg.add(var.set_path(config["path"]))
+    cg.add(var.set_data(config["data"]))
+    return var
+
+@automation.register_action("waveshare_sdmmc.read_file", READ_ACTION_SCHEMA)
+async def read_file_action(config, action_id, template_arg):
+    var = cg.new_Pvariable(action_id, template_arg)
+    cg.add(var.set_path(config["path"]))
+    return var
