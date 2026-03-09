@@ -26,6 +26,7 @@ void WaveshareSDMMC::setup() {
   if (ret != ESP_OK) {
     ESP_LOGE(TAG, "Falha ao montar SDMMC: %s", esp_err_to_name(ret));
     this->initialized_ = false;
+    this->last_error_ = esp_err_to_name(ret);
     return;
   }
 
@@ -34,25 +35,39 @@ void WaveshareSDMMC::setup() {
 }
 
 void WaveshareSDMMC::loop() {
-  // opcional
+  // Nada automático — tudo manual
 }
 
 bool WaveshareSDMMC::write_file(const char *path, const char *data) {
-  if (!this->initialized_) return false;
+  if (!this->initialized_) {
+    this->last_error_ = "SD não montado";
+    return false;
+  }
 
   FILE *f = fopen(path, "w");
-  if (!f) return false;
+  if (!f) {
+    this->last_error_ = "Erro ao abrir arquivo";
+    return false;
+  }
 
   fprintf(f, "%s", data);
   fclose(f);
+
+  this->last_error_.clear();
   return true;
 }
 
 std::string WaveshareSDMMC::read_file(const char *path) {
-  if (!this->initialized_) return "";
+  if (!this->initialized_) {
+    this->last_error_ = "SD não montado";
+    return "";
+  }
 
   FILE *f = fopen(path, "r");
-  if (!f) return "";
+  if (!f) {
+    this->last_error_ = "Erro ao abrir arquivo";
+    return "";
+  }
 
   char buffer[512];
   std::string result;
@@ -62,7 +77,55 @@ std::string WaveshareSDMMC::read_file(const char *path) {
   }
 
   fclose(f);
+
+  this->last_read_ = result;
+  this->last_error_.clear();
   return result;
+}
+
+size_t WaveshareSDMMC::get_total_space() {
+  if (!this->initialized_) return 0;
+
+  FATFS *fs;
+  DWORD fre_clust, fre_sect, tot_sect;
+
+  f_getfree("0:", &fre_clust, &fs);
+  tot_sect = (fs->n_fatent - 2) * fs->csize;
+  return tot_sect * 512;
+}
+
+size_t WaveshareSDMMC::get_free_space() {
+  if (!this->initialized_) return 0;
+
+  FATFS *fs;
+  DWORD fre_clust, fre_sect, tot_sect;
+
+  f_getfree("0:", &fre_clust, &fs);
+  fre_sect = fre_clust * fs->csize;
+  return fre_sect * 512;
+}
+
+void WaveshareSDMMC::update_sensors() {
+  if (this->mounted_sensor_)
+    this->mounted_sensor_->publish_state(this->initialized_);
+
+  if (!this->initialized_) {
+    if (this->last_error_sensor_)
+      this->last_error_sensor_->publish_state("SD não montado");
+    return;
+  }
+
+  if (this->total_space_sensor_)
+    this->total_space_sensor_->publish_state(this->get_total_space());
+
+  if (this->free_space_sensor_)
+    this->free_space_sensor_->publish_state(this->get_free_space());
+
+  if (this->last_error_sensor_)
+    this->last_error_sensor_->publish_state(this->last_error_);
+
+  if (this->last_read_sensor_)
+    this->last_read_sensor_->publish_state(this->last_read_);
 }
 
 }  // namespace waveshare_sdmmc
