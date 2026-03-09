@@ -1,27 +1,19 @@
 #include "sdmmc.h"
 #include "esphome/core/log.h"
-
 #include "driver/sdmmc_host.h"
 #include "driver/sdmmc_defs.h"
 #include "esp_vfs_fat.h"
 
 namespace esphome {
-namespace sdmmc {
+namespace waveshare_sdmmc {
 
-static const char *TAG = "sdmmc";
+static const char *TAG = "waveshare_sdmmc";
 
-void SDMMC::setup() {
+void WaveshareSDMMC::setup() {
   ESP_LOGI(TAG, "Inicializando SDMMC...");
 
   sdmmc_host_t host = SDMMC_HOST_DEFAULT();
-  host.flags = SDMMC_HOST_FLAG_1BIT;
-
   sdmmc_slot_config_t slot_config = SDMMC_SLOT_CONFIG_DEFAULT();
-  slot_config.width = 1;
-
-  slot_config.clk = GPIO_NUM_48;
-  slot_config.cmd = GPIO_NUM_47;
-  slot_config.d0  = GPIO_NUM_45;
 
   esp_vfs_fat_sdmmc_mount_config_t mount_config = {
       .format_if_mount_failed = false,
@@ -29,40 +21,49 @@ void SDMMC::setup() {
       .allocation_unit_size = 16 * 1024
   };
 
-  sdmmc_card_t *card;
-
-  esp_err_t ret = esp_vfs_fat_sdmmc_mount("/sdcard", &host, &slot_config, &mount_config, &card);
+  esp_err_t ret = esp_vfs_fat_sdmmc_mount("/sdcard", &host, &slot_config, &mount_config, &this->card_);
 
   if (ret != ESP_OK) {
     ESP_LOGE(TAG, "Falha ao montar SDMMC: %s", esp_err_to_name(ret));
-    mounted_ = false;
+    this->initialized_ = false;
     return;
   }
 
-  mounted_ = true;
-
-  FATFS *fs;
-  DWORD fre_clust, fre_sect, tot_sect;
-
-  f_getfree("0:", &fre_clust, &fs);
-
-  tot_sect = (fs->n_fatent - 2) * fs->csize;
-  fre_sect = fre_clust * fs->csize;
-
-  total_bytes_ = tot_sect * 512;
-  used_bytes_  = total_bytes_ - (fre_sect * 512);
-
-  ESP_LOGI(TAG, "SDMMC montado com sucesso");
+  ESP_LOGI(TAG, "SDMMC montado com sucesso!");
+  this->initialized_ = true;
 }
 
-void SDMMC::dump_config() {
-  ESP_LOGCONFIG(TAG, "SDMMC:");
-  ESP_LOGCONFIG(TAG, "  Montado: %s", mounted_ ? "Sim" : "Não");
-  if (mounted_) {
-    ESP_LOGCONFIG(TAG, "  Total: %u bytes", (unsigned) total_bytes_);
-    ESP_LOGCONFIG(TAG, "  Usado: %u bytes", (unsigned) used_bytes_);
+void WaveshareSDMMC::loop() {
+  // opcional
+}
+
+bool WaveshareSDMMC::write_file(const char *path, const char *data) {
+  if (!this->initialized_) return false;
+
+  FILE *f = fopen(path, "w");
+  if (!f) return false;
+
+  fprintf(f, "%s", data);
+  fclose(f);
+  return true;
+}
+
+std::string WaveshareSDMMC::read_file(const char *path) {
+  if (!this->initialized_) return "";
+
+  FILE *f = fopen(path, "r");
+  if (!f) return "";
+
+  char buffer[512];
+  std::string result;
+
+  while (fgets(buffer, sizeof(buffer), f)) {
+    result += buffer;
   }
+
+  fclose(f);
+  return result;
 }
 
-}  // namespace sdmmc
+}  // namespace waveshare_sdmmc
 }  // namespace esphome
