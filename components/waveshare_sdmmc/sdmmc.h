@@ -1,20 +1,23 @@
 #pragma once
 
 #include "esphome/core/component.h"
-#include "esphome/core/log.h"
+#include "sdmmc_cmd.h"
 
 namespace esphome {
-namespace sdmmc {
+namespace waveshare_sdmmc {
 
-class SDMMC : public Component {
+class WaveshareSDMMC : public Component {
  public:
   void setup() override;
-  void dump_config() override;
+  void loop() override;
 
-  bool mounted_{false};
-  size_t total_bytes_{0};
-  size_t used_bytes_{0};
+  bool write_file(const char *path, const char *data);
+  std::string read_file(const char *path);
+
+ protected:
+  sdmmc_card_t *card_{nullptr};
+  bool initialized_{false};
 };
 
-}  // namespace sdmmc
+}  // namespace waveshare_sdmmc
 }  // namespace esphome
