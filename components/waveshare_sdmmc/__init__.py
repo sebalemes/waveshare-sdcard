@@ -31,9 +31,6 @@ async def update_sensors_action(config, action_id, template_arg, args):
     return cg.new_Pvariable(action_id, template_arg, parent)
 
 async def to_code(config):
-    # Dependências do ESP-IDF
-    esp32.add_idf_component(name="fatfs")
-    esp32.add_idf_component(name="driver")
 
     var = cg.new_Pvariable(config[CONF_ID])
     await cg.register_component(var, config)
