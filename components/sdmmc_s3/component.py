@@ -1,6 +1,5 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
-from esphome.components import component
 
 sdmmc_s3_ns = cg.esphome_ns.namespace("sdmmc_s3")
 SDMMCS3 = sdmmc_s3_ns.class_("SDMMCS3", cg.Component)
