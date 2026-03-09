@@ -1,0 +1,13 @@
+{
+  "name": "sdmmc",
+  "version": "0.3.0",
+  "build": {
+    "cmake": true
+  },
+  "files": [
+    "sdmmc.h",
+    "sdmmc.cpp",
+    "component.py",
+    "CMakeLists.txt"
+  ]
+}
