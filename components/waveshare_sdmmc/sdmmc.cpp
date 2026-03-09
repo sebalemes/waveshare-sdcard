@@ -3,7 +3,7 @@
 
 #include "driver/sdmmc_host.h"
 #include "driver/sdmmc_defs.h"
-#include "esp_vfs_fat.h"
+#include "fatfs/vfs/esp_vfs_fat.h"
 #include "ff.h"
 
 namespace esphome {
