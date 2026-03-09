@@ -1,5 +1,5 @@
 {
-  "name": "waveshare_sdcard",
+  "name": "sdmmc_s3",
   "version": "0.3.0",
   "build": {
     "cmake": true
