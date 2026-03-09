@@ -3,7 +3,7 @@
 
 #include "driver/spi_common.h"
 #include "driver/sdspi_host.h"
-#include "fatfs/vfs/esp_vfs_fat.h"
+#include "esp_vfs_fat.h"
 #include "ff.h"
 
 namespace esphome {
