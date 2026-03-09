@@ -5,13 +5,14 @@ from esphome.automation import maybe_simple_id
 from esphome.components import sensor, text_sensor, binary_sensor
 from esphome.const import CONF_ID
 
+AUTO_LOAD = ["sensor", "text_sensor", "binary_sensor"]
+
 waveshare_sdmmc_ns = cg.esphome_ns.namespace("waveshare_sdmmc")
 WaveshareSDMMC = waveshare_sdmmc_ns.class_("WaveshareSDMMC", cg.Component)
 UpdateSensorsAction = waveshare_sdmmc_ns.class_("UpdateSensorsAction", automation.Action)
 
 CONFIG_SCHEMA = cv.Schema({
     cv.GenerateID(): cv.declare_id(WaveshareSDMMC),
-
     cv.Optional("total_space"): sensor.sensor_schema(),
     cv.Optional("free_space"): sensor.sensor_schema(),
     cv.Optional("mounted"): binary_sensor.binary_sensor_schema(),
@@ -22,11 +23,9 @@ CONFIG_SCHEMA = cv.Schema({
 @automation.register_action(
     "waveshare_sdmmc.update_sensors",
     UpdateSensorsAction,
-    maybe_simple_id(
-        {
-            cv.GenerateID(CONF_ID): cv.use_id(WaveshareSDMMC),
-        }
-    ),
+    maybe_simple_id({
+        cv.GenerateID(CONF_ID): cv.use_id(WaveshareSDMMC),
+    }),
 )
 async def update_sensors_action(config, action_id, template_arg, args):
     parent = await cg.get_variable(config[CONF_ID])
