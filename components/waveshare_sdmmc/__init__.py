@@ -1,7 +1,9 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome import automation
+from esphome.automation import maybe_simple_id
 from esphome.components import sensor, text_sensor, binary_sensor
+from esphome.const import CONF_ID
 
 waveshare_sdmmc_ns = cg.esphome_ns.namespace("waveshare_sdmmc")
 WaveshareSDMMC = waveshare_sdmmc_ns.class_("WaveshareSDMMC", cg.Component)
@@ -15,22 +17,23 @@ CONFIG_SCHEMA = cv.Schema({
     cv.Optional("mounted"): binary_sensor.binary_sensor_schema(),
     cv.Optional("last_error"): text_sensor.text_sensor_schema(),
     cv.Optional("last_read"): text_sensor.text_sensor_schema(),
-
 }).extend(cv.COMPONENT_SCHEMA)
-
-# Ação para atualizar sensores manualmente
-UPDATE_ACTION_SCHEMA = cv.Schema({})
 
 @automation.register_action(
     "waveshare_sdmmc.update_sensors",
-    UPDATE_ACTION_SCHEMA
+    UpdateSensorsAction,
+    maybe_simple_id(
+        {
+            cv.GenerateID(CONF_ID): cv.use_id(WaveshareSDMMC),
+        }
+    ),
 )
-async def update_sensors_action(config, action_id, template_arg):
-    parent = await cg.get_variable(config[cv.GenerateID()])
-    return cg.new_Pvariable(action_id, parent)
+async def update_sensors_action(config, action_id, template_arg, args):
+    parent = await cg.get_variable(config[CONF_ID])
+    return cg.new_Pvariable(action_id, template_arg, parent)
 
 async def to_code(config):
-    var = cg.new_Pvariable(config[cv.GenerateID()])
+    var = cg.new_Pvariable(config[CONF_ID])
     await cg.register_component(var, config)
 
     if "total_space" in config:
