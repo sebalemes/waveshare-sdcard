@@ -25,6 +25,9 @@ class WaveshareSDMMC : public Component {
   void set_last_error_sensor(text_sensor::TextSensor *s) { this->last_error_sensor_ = s; }
   void set_last_read_sensor(text_sensor::TextSensor *s) { this->last_read_sensor_ = s; }
 
+  // Atualização manual
+  void update_sensors();
+
   // Funções auxiliares
   size_t get_total_space();
   size_t get_free_space();
