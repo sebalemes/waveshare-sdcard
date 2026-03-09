@@ -5,6 +5,8 @@
 #include "driver/sdmmc_defs.h"
 #include "fatfs/vfs/esp_vfs_fat.h"
 #include "ff.h"
+#include "driver/sdspi_host.h"
+#include "driver/spi_common.h"
 
 namespace esphome {
 namespace waveshare_sdmmc {
