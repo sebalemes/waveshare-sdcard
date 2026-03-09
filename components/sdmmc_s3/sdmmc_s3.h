@@ -4,9 +4,9 @@
 #include "esphome/core/log.h"
 
 namespace esphome {
-namespace sdmmc_s3 {
+namespace sdmmc {
 
-class SDMMCS3 : public Component {
+class SDMMC : public Component {
  public:
   void setup() override;
   void dump_config() override;
@@ -16,5 +16,5 @@ class SDMMCS3 : public Component {
   size_t used_bytes_{0};
 };
 
-}  // namespace sdmmc_s3
+}  // namespace sdmmc
 }  // namespace esphome
