@@ -12,21 +12,10 @@ namespace waveshare_sdmmc {
 static const char *TAG = "waveshare_sdmmc";
 
 // Pinos do TF Card na Waveshare ESP32-S3-ETH-8DI-8RO
-sdspi_device_config_t slot_config = SDSPI_DEVICE_CONFIG_DEFAULT();
-
-slot_config.gpio_cs = -1;   // CS controlado pela placa
-slot_config.host_id = host.slot;
-
-slot_config.gpio_miso = GPIO_NUM_45;
-slot_config.gpio_mosi = GPIO_NUM_47;
-slot_config.gpio_sck  = GPIO_NUM_48;
-
-// ATENÇÃO:
-// A tabela da placa mostra CS = NC.
-// Se o hardware realmente não expõe CS ao usuário, este ponto pode exigir
-// ajuste conforme o esquemático real da placa ou implementação do fabricante.
-// Aqui deixamos um placeholder para teste.
-static constexpr gpio_num_t PIN_NUM_CS   = GPIO_NUM_NC;
+static constexpr gpio_num_t PIN_NUM_MISO = GPIO_NUM_45;
+static constexpr gpio_num_t PIN_NUM_MOSI = GPIO_NUM_47;
+static constexpr gpio_num_t PIN_NUM_CLK  = GPIO_NUM_48;
+static constexpr gpio_num_t PIN_NUM_CS   = GPIO_NUM_NC;  // CS não exposto
 
 void WaveshareSDMMC::setup() {
   ESP_LOGI(TAG, "Inicializando TF Card via SDSPI...");
@@ -55,6 +44,7 @@ void WaveshareSDMMC::setup() {
 
   sdmmc_host_t host = SDSPI_HOST_DEFAULT();
   host.slot = SPI2_HOST;
+  host.max_freq_khz = 20000;  // reduz velocidade para teste
 
   sdspi_device_config_t slot_config = SDSPI_DEVICE_CONFIG_DEFAULT();
   slot_config.host_id = SPI2_HOST;
