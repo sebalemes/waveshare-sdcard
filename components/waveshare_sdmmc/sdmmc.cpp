@@ -1,5 +1,6 @@
 #include "sdmmc.h"
 #include "esphome/core/log.h"
+#include "esphome/core/hal.h"
 
 #include "driver/spi_common.h"
 #include "driver/sdspi_host.h"
