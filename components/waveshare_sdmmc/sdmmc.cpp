@@ -13,7 +13,7 @@ namespace waveshare_sdmmc {
 
 static const char *TAG = "waveshare_sdmmc";
 
-// Pinos confirmados no multímetro
+// Pinagem confirmada no multímetro
 static constexpr gpio_num_t PIN_NUM_MISO = GPIO_NUM_45;
 static constexpr gpio_num_t PIN_NUM_MOSI = GPIO_NUM_47;
 static constexpr gpio_num_t PIN_NUM_CLK  = GPIO_NUM_48;
@@ -22,14 +22,10 @@ static constexpr gpio_num_t PIN_NUM_CS   = GPIO_NUM_21;
 void WaveshareSDMMC::setup() {
   ESP_LOGI(TAG, "Inicializando TF Card via SDSPI...");
 
-  // Garante estado inicial do CS
+  // Deixa CS inativo antes da inicialização
   gpio_set_direction(PIN_NUM_CS, GPIO_MODE_OUTPUT);
   gpio_set_level(PIN_NUM_CS, 1);
-  delay(20);
-  gpio_set_level(PIN_NUM_CS, 0);
-  delay(20);
-  gpio_set_level(PIN_NUM_CS, 1);
-  delay(20);
+  delay(50);
 
   spi_bus_config_t bus_cfg = {};
   bus_cfg.mosi_io_num = PIN_NUM_MOSI;
@@ -45,8 +41,7 @@ void WaveshareSDMMC::setup() {
 #endif
   bus_cfg.max_transfer_sz = 4000;
 
-  // Teste com SPI3_HOST
-  esp_err_t ret = spi_bus_initialize(SPI3_HOST, &bus_cfg, SPI_DMA_CH_AUTO);
+  esp_err_t ret = spi_bus_initialize(SPI2_HOST, &bus_cfg, SPI_DMA_CH_AUTO);
   if (ret != ESP_OK) {
     ESP_LOGE(TAG, "Falha ao inicializar SPI bus: %s", esp_err_to_name(ret));
     this->initialized_ = false;
@@ -55,11 +50,11 @@ void WaveshareSDMMC::setup() {
   }
 
   sdmmc_host_t host = SDSPI_HOST_DEFAULT();
-  host.slot = SPI3_HOST;
+  host.slot = SPI2_HOST;
   host.max_freq_khz = 4000;
 
   sdspi_device_config_t slot_config = SDSPI_DEVICE_CONFIG_DEFAULT();
-  slot_config.host_id = SPI3_HOST;
+  slot_config.host_id = SPI2_HOST;
   slot_config.gpio_cs = PIN_NUM_CS;
 
   esp_vfs_fat_mount_config_t mount_config = {
@@ -74,7 +69,7 @@ void WaveshareSDMMC::setup() {
     ESP_LOGE(TAG, "Falha ao montar SDSPI: %s", esp_err_to_name(ret));
     this->initialized_ = false;
     this->last_error_ = esp_err_to_name(ret);
-    spi_bus_free(SPI3_HOST);
+    spi_bus_free(SPI2_HOST);
     return;
   }
 
